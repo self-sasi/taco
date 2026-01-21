@@ -1,6 +1,7 @@
 package state
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -27,4 +28,24 @@ func RemoveLock() error {
 		return err
 	}
 	return nil
+}
+
+func Status() (bool, error) {
+	gitDir, err := utils.GitDir()
+	if err != nil {
+		return false, err
+	}
+
+	p := filepath.Join(gitDir, lockFileName)
+
+	_, err = os.Stat(p)
+	if err == nil {
+		return true, nil
+	}
+
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+
+	return false, err
 }
